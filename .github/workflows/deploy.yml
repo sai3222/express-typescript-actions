@@ -2,9 +2,9 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ test ]
+    branches: [ remove-branch ]
   pull_request:
-    branches: [ test ]
+    branches: [ remove-branch ]
   workflow_dispatch: {}
 
 env:
