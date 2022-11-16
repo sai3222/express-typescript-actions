@@ -32,7 +32,7 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[set-output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "##[name=branch;]$(echo ${GITHUB_REF})"
         id: extract_branch
       - name: Extract commit hash
         shell: bash
@@ -55,23 +55,3 @@ jobs:
         run: |  
           aws s3 sync --delete ./dist s3://${{ env.BUCKET_NAME }}/${{ steps.extract_branch.outputs.branch }}/${{ steps.extract.outputs.commit_hash }}
         
-  deploy:
-    name: Deploy to EC2
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    
-    steps:
-    - uses: actions/checkout@v2
-    - run: |
-        echo "Deploying branch"
-
-    - name: Configure AWS credentials from Test account
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::464615698121:role/gitHub-actions-role
-        aws-region: ${{ env.AWS_REGION }}
-    - run: |
-        aws deploy create-deployment --application-name node-express-app --deployment-group-name node-deployment --s3-location bucket=typescript-express-artifact,key=main/latest/project.zip,bundleType=zip
