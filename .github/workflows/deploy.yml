@@ -32,11 +32,11 @@ jobs:
 
       - name: Extract branch name
         shell: bash
-        run: echo "##[GITHUB_OUTPUT name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
+        run: echo "##[github_output name=branch;]$(echo ${GITHUB_REF#refs/heads/})"
         id: extract_branch
       - name: Extract commit hash
         shell: bash
-        run: echo "##[GITHUB_OUTPUT name=commit_hash;]$(echo "$GITHUB_SHA")"
+        run: echo "##[github_output name=commit_hash;]$(echo "$GITHUB_SHA")"
         id: extract_hash          
       
       - name: Use Node.js
@@ -53,7 +53,7 @@ jobs:
       # Copy build directory to S3
       - name:  Copy build to S3
         run: |  
-          aws s3 sync --delete ./dist s3://${{ env.BUCKET_NAME }}/${{ steps.extract_branch.OUTPUTS.branch }}/${{ steps.extract.OUTPUTS.commit_hash }}
+          aws s3 sync --delete ./dist s3://${{ env.BUCKET_NAME }}/${{ steps.extract_branch.outputs.branch }}/${{ steps.extract.outputs.commit_hash }}
         
   deploy:
     name: Deploy to EC2
