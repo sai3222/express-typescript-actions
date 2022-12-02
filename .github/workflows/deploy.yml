@@ -49,29 +49,14 @@ jobs:
 
       - name: Make Artifact directory
         run: mkdir -p ./artifacts
+        
+      - uses: actions/checkout@v2
+      - uses: vimtor/action-zip@v1
+        with:
+          files: dist/ *
+          dest: myapp.zip
 
       # Copy build directory to S3
       - name:  Copy build to S3
         run: |  
           aws s3 sync --delete ./dist s3://${{ env.BUCKET_NAME }}/${{ steps.extract_branch.outputs.branch }}/${{ steps.extract.outputs.commit_hash }}
-        
-  deploy:
-    name: Deploy to EC2
-    needs: build
-    runs-on: ubuntu-latest
-    permissions:
-      id-token: write
-      contents: read
-    
-    steps:
-    - uses: actions/checkout@v2
-    - run: |
-        echo "Deploying branch"
-
-    - name: Configure AWS credentials from Test account
-      uses: aws-actions/configure-aws-credentials@v1
-      with:
-        role-to-assume: arn:aws:iam::597257270314:role/Github-actionsopenid
-        aws-region: ${{ env.AWS_REGION }}
-    - run: |
-        aws deploy create-deployment --application-name node-express-app --deployment-group-name node-deployment --s3-location bucket=typescript-express-artifact,key=main/latest/project.zip,bundleType=zip
